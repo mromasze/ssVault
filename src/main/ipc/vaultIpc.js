@@ -435,6 +435,20 @@ function registerVaultIpcHandlers(mainWindow) {
         }
     });
     
+    ipcMain.handle('get-app-info', () => {
+        try {
+            const pkg = require(path.resolve(__dirname, '../../../package.json'));
+            return {
+                version: pkg.version,
+                author: pkg.author,
+                license: pkg.license
+            };
+        } catch (err) {
+            console.error('get-app-info error:', err);
+            return { version: 'Unknown', author: 'Unknown', license: 'Unknown' };
+        }
+    });
+
     ipcMain.handle('gpg-decrypt', async (event, { text, keyId }) => {
         const db = getCurrentDB();
         if (!db) return { success: false, error: 'No open vault/database.' };

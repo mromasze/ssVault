@@ -73,12 +73,11 @@ class FileManager {
     async storeFileInVault(sourceFilePath, originalName, shouldMove = false) {
         try {
             
-            const storedFilename = this.generateStoredFilename(originalName) + '.gpg';
-            const destPath = path.join(this.filesDir, storedFilename);
+            const name = this.generateStoredFilename(originalName) + '.gpg';
+            const destPath = path.join(this.filesDir, name);
 
             
             const fileBuffer = fs.readFileSync(sourceFilePath);
-            const fileSize = fileBuffer.length;
             const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
 
             
@@ -94,8 +93,7 @@ class FileManager {
 
             return {
                 originalName,
-                storedFilename,
-                size: fileSize, 
+                name,
                 hash: fileHash, 
                 addedDate: new Date().toISOString()
             };
@@ -152,8 +150,8 @@ class FileManager {
         return Buffer.from(decrypted);
     }
 
-    async getFileFromVault(storedFilename) {
-        const filePath = path.join(this.filesDir, storedFilename);
+    async getFileFromVault(name) {
+        const filePath = path.join(this.filesDir, name);
         if (!fs.existsSync(filePath)) {
             throw new Error('File not found in vault');
         }
@@ -167,7 +165,7 @@ class FileManager {
         return decryptedBuffer;
     }
 
-    async exportFileFromVault(storedFilename, originalName) {
+    async exportFileFromVault(name, originalName) {
         const result = await dialog.showSaveDialog({
             title: 'Export file from vault',
             defaultPath: originalName
@@ -178,7 +176,7 @@ class FileManager {
         }
 
         
-        const decryptedBuffer = await this.getFileFromVault(storedFilename);
+        const decryptedBuffer = await this.getFileFromVault(name);
         
         
         fs.writeFileSync(result.filePath, decryptedBuffer);
@@ -186,15 +184,15 @@ class FileManager {
         return result.filePath;
     }
 
-    deleteFileFromVault(storedFilename) {
-        const filePath = path.join(this.filesDir, storedFilename);
+    deleteFileFromVault(name) {
+        const filePath = path.join(this.filesDir, name);
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
     }
 
-    async verifyFileIntegrity(storedFilename, expectedHash) {
-        const decryptedBuffer = await this.getFileFromVault(storedFilename);
+    async verifyFileIntegrity(name, expectedHash) {
+        const decryptedBuffer = await this.getFileFromVault(name);
         const actualHash = crypto.createHash('sha256')
             .update(decryptedBuffer)
             .digest('hex');

@@ -27,11 +27,9 @@ function registerFileIpcHandlers() {
             
             const db = getCurrentDB();
             const res = await addFile({
-                name: originalName,
+                name: fileData.name,
                 originalName: fileData.originalName,
-                size: fileData.size,
                 hash: fileData.hash,
-                storedFilename: fileData.storedFilename,
                 addedDate: fileData.addedDate
             }, db);
             
@@ -65,7 +63,7 @@ function registerFileIpcHandlers() {
             
             const fileManager = handler.fileManager;
             const exportPath = await fileManager.exportFileFromVault(
-                fileRecord.stored_filename,
+                fileRecord.name,
                 fileRecord.original_name
             );
             
@@ -94,7 +92,7 @@ function registerFileIpcHandlers() {
             
             
             const fileManager = handler.fileManager;
-            fileManager.deleteFileFromVault(fileRecord.stored_filename);
+            fileManager.deleteFileFromVault(fileRecord.name);
             
             
             const res = await deleteFile(fileId, db);

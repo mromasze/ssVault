@@ -14,7 +14,7 @@ export const passwordItems = new Map();
 // Render empty state
 function renderEmptyState(tabId, body) {
     const meta = typeMeta[tabId];
-    const colspan = tabId === 'passwords' ? 6 : tabId === 'files' ? 5 : tabId === 'gpg' ? 4 : 2;
+    const colspan = tabId === 'passwords' ? 7 : tabId === 'files' ? 4 : tabId === 'gpg' ? 5 : 3;
     body.innerHTML = `
         <tr>
             <td colspan="${colspan}" class="text-center">
@@ -41,6 +41,10 @@ function renderPasswords(rows, body) {
         qs('.copy-password', tr).dataset.password = item.password || '';
         qs('.edit-password', tr).dataset.id = item.id;
         qs('.delete-password', tr).dataset.id = item.id;
+        
+        const added = item.added_date || item._added;
+        qs('.cell-added', tr).textContent = added ? new Date(added).toLocaleDateString() : '';
+        
         body.appendChild(tr);
     });
 }
@@ -49,13 +53,11 @@ function renderFiles(rows, body) {
     rows.forEach(item => {
         const displayName = item._displayName;
         const type = item._type;
-        const sizeKB = item._size ? Math.round(item._size / 1024) : 0;
         const addedDate = item._added ? new Date(item._added).toLocaleDateString() : '';
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${displayName}</td>
             <td>${type}</td>
-            <td>${sizeKB} KB</td>
             <td>${addedDate}</td>
             <td>
                 <div class="d-flex gap-2">
@@ -76,10 +78,12 @@ function renderGpg(rows, body) {
         const tr = document.createElement('tr');
         const typeDisplay = item.value === 'private' ? 'Private Key' : item.value === 'public' ? 'Public Key' : item.value || 'Key';
         const userId = item.user_id || '-';
+        const addedDate = item.added_date ? new Date(item.added_date).toLocaleDateString() : '';
         tr.innerHTML = `
             <td>${item.name}</td>
             <td>${userId}</td>
             <td>${typeDisplay}</td>
+            <td>${addedDate}</td>
             <td>
                 <div class="d-flex gap-2">
                     <button class="btn btn-sm btn-outline-primary export-gpg" data-id="${item.id}" title="Export key">
@@ -97,8 +101,10 @@ function renderGpg(rows, body) {
 function renderGroups(rows, body) {
     rows.forEach(g => {
         const tr = document.createElement('tr');
+        const addedDate = g.added_date ? new Date(g.added_date).toLocaleDateString() : '';
         tr.innerHTML = `
             <td>${g.name}</td>
+            <td>${addedDate}</td>
             <td>
                 <button class="btn btn-sm btn-outline-danger delete-group" data-id="${g.id}">
                     <i class="bi bi-trash"></i>
@@ -147,18 +153,18 @@ export async function loadData(tabId, keepSort = true) {
     if (tabId === 'files') {
         rows = rows.map(f => ({
             ...f,
-            _displayName: f.name || f.original_name || f.stored_filename || '',
-            _type: f.type || mapFileTypeFromName(f.name || f.original_name || ''),
-            _size: f.size || 0,
+            _displayName: f.original_name || f.name || '',
+            _type: f.type || mapFileTypeFromName(f.original_name || f.name || ''),
             _added: f.added_date || ''
         }));
 
         const state = sortState.files;
         if (keepSort && state.key) {
-            const keyMap = { name: '_displayName', type: '_type', size: '_size', added: '_added', added_date: '_added' };
+            const keyMap = { name: '_displayName', type: '_type', added: '_added', added_date: '_added' };
             rows = sortByKey(rows, keyMap[state.key] || '_displayName', state.dir);
         }
     } else {
+        // Generic sorting
         const state = sortState[tabId];
         if (keepSort && state?.key) {
             rows = sortByKey(rows, state.key, state.dir);

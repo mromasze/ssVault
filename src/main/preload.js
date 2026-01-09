@@ -27,5 +27,6 @@ contextBridge.exposeInMainWorld('api', {
     exportGpgKey: (id) => ipcRenderer.invoke('export-gpg-key', id),
     deleteGpgKey: (id) => ipcRenderer.invoke('delete-gpg-key', id),
     gpgEncrypt: (payload) => ipcRenderer.invoke('gpg-encrypt', payload),
-    gpgDecrypt: (payload) => ipcRenderer.invoke('gpg-decrypt', payload)
+    gpgDecrypt: (payload) => ipcRenderer.invoke('gpg-decrypt', payload),
+    getAppInfo: () => ipcRenderer.invoke('get-app-info')
 });

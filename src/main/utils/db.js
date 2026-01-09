@@ -131,12 +131,13 @@ function all(db, sql, params = []) {
 }
 
 async function ensureBaseTables(db = getCurrentDB()) {
-    await run(db, "CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, name TEXT, password TEXT)");
-    await run(db, "CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, name TEXT, path TEXT)");
-    await run(db, "CREATE TABLE IF NOT EXISTS gpg (id INTEGER PRIMARY KEY, name TEXT, type TEXT)");
-    await run(db, "CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY, name TEXT UNIQUE)");
+    await run(db, "CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, name TEXT, password TEXT, added_date TEXT)");
+    await run(db, "CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, name TEXT, path TEXT, added_date TEXT)");
+    await run(db, "CREATE TABLE IF NOT EXISTS gpg (id INTEGER PRIMARY KEY, name TEXT, type TEXT, added_date TEXT)");
+    await run(db, "CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY, name TEXT UNIQUE, added_date TEXT)");
     
-    await run(db, "INSERT OR IGNORE INTO groups (id, name) VALUES (1, 'Default')");
+    const now = new Date().toISOString();
+    await run(db, "INSERT OR IGNORE INTO groups (id, name, added_date) VALUES (1, 'Default', ?)", [now]);
 }
 
 async function ensurePasswordColumns(db = getCurrentDB()) {
@@ -148,13 +149,11 @@ async function ensurePasswordColumns(db = getCurrentDB()) {
     if (!have('group_id')) alters.push('ALTER TABLE passwords ADD COLUMN group_id INTEGER DEFAULT 1');
     if (!have('address')) alters.push('ALTER TABLE passwords ADD COLUMN address TEXT');
     if (!have('username')) alters.push('ALTER TABLE passwords ADD COLUMN username TEXT');
+    if (!have('added_date')) alters.push('ALTER TABLE passwords ADD COLUMN added_date TEXT');
     
     for (const sql of alters) {
         await run(db, sql);
     }
-    
-    // Note: group_name column is deprecated but we don't remove it to avoid breaking old vaults
-    // New code should only use group_id
 }
 
 async function ensureFileColumns(db = getCurrentDB()) {
@@ -183,6 +182,18 @@ async function ensureGpgColumns(db = getCurrentDB()) {
     if (!have('user_id')) {
         await run(db, 'ALTER TABLE gpg ADD COLUMN user_id TEXT');
     }
+    if (!have('added_date')) {
+        await run(db, 'ALTER TABLE gpg ADD COLUMN added_date TEXT');
+    }
+}
+
+async function ensureGroupColumns(db = getCurrentDB()) {
+    const cols = await all(db, 'PRAGMA table_info(groups)');
+    const have = (n) => cols.some(c => c.name === n);
+    
+    if (!have('added_date')) {
+        await run(db, 'ALTER TABLE groups ADD COLUMN added_date TEXT');
+    }
 }
 
 async function ensureAuthColumns(db = getCurrentDB()) {
@@ -206,9 +217,10 @@ async function optimize(db = getCurrentDB()) {
 
 async function ensureGroupByName(name, db = getCurrentDB()) {
     if (!name) return null;
+    await ensureGroupColumns(db);
     const found = await get(db, 'SELECT id FROM groups WHERE name = ?', [name]).catch(() => null);
     if (found && found.id) return found.id;
-    await run(db, 'INSERT OR IGNORE INTO groups (name) VALUES (?)', [name]).catch(() => {});
+    await run(db, 'INSERT OR IGNORE INTO groups (name, added_date) VALUES (?, ?)', [name, new Date().toISOString()]).catch(() => {});
     const again = await get(db, 'SELECT id FROM groups WHERE name = ?', [name]).catch(() => null);
     return again ? again.id : null;
 }
@@ -221,7 +233,8 @@ async function getPasswords(db = getCurrentDB()) {
                            COALESCE(g.name, 'Default') AS group_name,
                            p.address,
                            p.username,
-                           p.password
+                           p.password,
+                           p.added_date
                     FROM passwords p
                     LEFT JOIN groups g ON g.id = p.group_id
                     ORDER BY p.id DESC`);
@@ -235,7 +248,7 @@ async function getFiles(db = getCurrentDB()) {
 async function getGpg(db = getCurrentDB()) {
     await ensureBaseTables(db);
     await ensureGpgColumns(db);
-    return all(db, 'SELECT id, name, type AS value, content, user_id FROM gpg ORDER BY id DESC');
+    return all(db, 'SELECT id, name, type AS value, content, user_id, added_date FROM gpg ORDER BY id DESC');
 }
 
 async function getCounts(db = getCurrentDB()) {
@@ -254,8 +267,9 @@ async function addPassword(payload, db = getCurrentDB()) {
     const { label, group, address, username, password } = payload;
     
     const groupId = group ? await ensureGroupByName(group, db) : 1;
-    const res = await run(db, 'INSERT INTO passwords (name, label, group_id, address, username, password) VALUES (?,?,?,?,?,?)', [
-        label, label, groupId, address || null, username || null, password
+    const addedDate = new Date().toISOString();
+    const res = await run(db, 'INSERT INTO passwords (name, label, group_id, address, username, password, added_date) VALUES (?,?,?,?,?,?,?)', [
+        label, label, groupId, address || null, username || null, password, addedDate
     ]);
     return { id: res && res.lastID };
 }
@@ -299,18 +313,22 @@ async function addGpg(payload, db = getCurrentDB()) {
     const type = payload.type || 'key';
     const content = payload.content || payload.value || '';
     const userId = payload.userId || payload.user_id || '';
-    const res = await run(db, 'INSERT INTO gpg (name, type, content, user_id) VALUES (?,?,?,?)', [payload.name, type, content, userId]);
+    const addedDate = new Date().toISOString();
+    const res = await run(db, 'INSERT INTO gpg (name, type, content, user_id, added_date) VALUES (?,?,?,?,?)', [payload.name, type, content, userId, addedDate]);
     return { id: res && res.lastID };
 }
 
 async function getGroups(db = getCurrentDB()) {
     await ensureBaseTables(db);
-    return all(db, 'SELECT id, name FROM groups ORDER BY name ASC');
+    await ensureGroupColumns(db);
+    return all(db, 'SELECT id, name, added_date FROM groups ORDER BY name ASC');
 }
 
 async function addGroup(name, db = getCurrentDB()) {
     await ensureBaseTables(db);
-    const res = await run(db, 'INSERT OR IGNORE INTO groups (name) VALUES (?)', [name]);
+    await ensureGroupColumns(db);
+    const addedDate = new Date().toISOString();
+    const res = await run(db, 'INSERT OR IGNORE INTO groups (name, added_date) VALUES (?,?)', [name, addedDate]);
     return { id: res && res.lastID };
 }
 

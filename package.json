@@ -1,6 +1,6 @@
 {
   "name": "ssVault",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Secure local password and secrets manager built with Electron.",
   "productName": "ssVault",
   "author": "mromasze",
@@ -32,6 +32,7 @@
     "adm-zip": "^0.5.16",
     "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.0",
+    "bootstrap-icons": "^1.13.1",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^11.0.2",
     "openpgp": "^6.2.2"

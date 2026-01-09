@@ -239,4 +239,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         bootstrap.Modal.getInstance(document.getElementById('passwordGeneratorModal'))?.hide();
     });
+
+    // Settings handler
+    const settingsBtn = document.getElementById('settingsBtn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', async () => {
+            const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            modal.show();
+            
+            try {
+                const info = await window.api.getAppInfo();
+                document.getElementById('appVersion').textContent = info.version || 'Unknown';
+                document.getElementById('appAuthor').textContent = info.author || 'Unknown';
+                document.getElementById('appLicense').textContent = info.license || 'Unknown';
+            } catch (err) {
+                console.error('Failed to load app info:', err);
+            }
+        });
+    }
 });

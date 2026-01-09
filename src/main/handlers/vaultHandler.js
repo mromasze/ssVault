@@ -159,26 +159,26 @@ class VaultHandler {
                                 } catch (keyErr) {
                                     return reject(keyErr);
                                 }
-                                db.run('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, name TEXT, password TEXT)', (err) => {
+                                db.run('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, name TEXT, password TEXT, added_date TEXT)', (err) => {
                                     if (err) return reject(err);
                                     console.log('Table passwords created');
                                     
                                     
-                                    db.run('CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, name TEXT, original_name TEXT, size INTEGER, hash TEXT, stored_filename TEXT, added_date TEXT)', (filesErr) => {
+                                    db.run('CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, name TEXT, original_name TEXT, hash TEXT, added_date TEXT)', (filesErr) => {
                                         if (filesErr) return reject(filesErr);
                                         console.log('Table files created');
                                         
                                         
-                                        db.run('CREATE TABLE IF NOT EXISTS gpg (id INTEGER PRIMARY KEY, name TEXT, type TEXT)', (gpgErr) => {
+                                        db.run('CREATE TABLE IF NOT EXISTS gpg (id INTEGER PRIMARY KEY, name TEXT, type TEXT, added_date TEXT)', (gpgErr) => {
                                             if (gpgErr) return reject(gpgErr);
                                             console.log('Table gpg created');
                                             
-                                            db.run('CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY, name TEXT UNIQUE)', (groupsErr) => {
+                                            db.run('CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY, name TEXT UNIQUE, added_date TEXT)', (groupsErr) => {
                                                 if (groupsErr) return reject(groupsErr);
                                                 console.log('Table groups created');
                                                 
                                                 
-                                                db.run('INSERT OR IGNORE INTO groups (id, name) VALUES (1, ?)', ['Default'], (defaultGroupErr) => {
+                                                db.run('INSERT OR IGNORE INTO groups (id, name, added_date) VALUES (1, ?, ?)', ['Default', new Date().toISOString()], (defaultGroupErr) => {
                                                     if (defaultGroupErr) return reject(defaultGroupErr);
                                                     console.log('Default group created');
                                                     
