@@ -13,11 +13,7 @@ jobs:
       contents: write
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest, macos-13]
-        include:
-          - os: macos-13
-            name: macos-metal
-            arch: arm64
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
       - name: Checkout
