@@ -204,6 +204,9 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button" role="tab">About</button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="updates-tab" data-bs-toggle="tab" data-bs-target="#updates" type="button" role="tab">Updates</button>
+                    </li>
                 </ul>
                 <div class="tab-content mt-3" id="settingsTabContent">
                     <div class="tab-pane fade show active" id="about" role="tabpanel">
@@ -235,10 +238,53 @@
                             </div>
                         </div>
                     </div>
+                    <div class="tab-pane fade" id="updates" role="tabpanel">
+                        <div class="p-4">
+                            <h5 class="mb-3">Update Settings</h5>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="autoUpdateCheckbox">
+                                <label class="form-check-label" for="autoUpdateCheckbox">
+                                    Automatically check for updates
+                                </label>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" id="checkForUpdatesBtn">
+                                    <i class="bi bi-arrow-repeat"></i> Check for updates
+                                </button>
+                            </div>
+                            <div id="updateStatusMsg" class="mt-3 text-muted small text-center"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Available Modal -->
+<div class="modal fade" id="updateAvailableModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Available</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>A new version of ssVault is available!</p>
+                <p class="text-muted small">Would you like to download and install it now?</p>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="dontAskAgainCheckbox">
+                    <label class="form-check-label" for="dontAskAgainCheckbox">
+                        Do not ask me again
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
+                <button type="button" class="btn btn-primary" id="downloadUpdateBtn">Download & Install</button>
             </div>
         </div>
     </div>

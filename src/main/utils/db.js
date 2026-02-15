@@ -132,9 +132,16 @@ function all(db, sql, params = []) {
 
 async function ensureBaseTables(db = getCurrentDB()) {
     await run(db, "CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, name TEXT, password TEXT, added_date TEXT)");
+    await ensurePasswordColumns(db);
+
     await run(db, "CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY, name TEXT, path TEXT, added_date TEXT)");
+    await ensureFileColumns(db);
+
     await run(db, "CREATE TABLE IF NOT EXISTS gpg (id INTEGER PRIMARY KEY, name TEXT, type TEXT, added_date TEXT)");
+    await ensureGpgColumns(db);
+
     await run(db, "CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY, name TEXT UNIQUE, added_date TEXT)");
+    await ensureGroupColumns(db);
     
     const now = new Date().toISOString();
     await run(db, "INSERT OR IGNORE INTO groups (id, name, added_date) VALUES (1, 'Default', ?)", [now]);
@@ -142,7 +149,7 @@ async function ensureBaseTables(db = getCurrentDB()) {
 
 async function ensurePasswordColumns(db = getCurrentDB()) {
     const cols = await all(db, 'PRAGMA table_info(passwords)');
-    const have = (n) => cols.some(c => c.name === n);
+    const have = (n) => cols.some(c => c.name.toLowerCase() === n.toLowerCase());
     const alters = [];
     
     if (!have('label')) alters.push('ALTER TABLE passwords ADD COLUMN label TEXT');
@@ -158,7 +165,7 @@ async function ensurePasswordColumns(db = getCurrentDB()) {
 
 async function ensureFileColumns(db = getCurrentDB()) {
     const cols = await all(db, 'PRAGMA table_info(files)');
-    const have = (n) => cols.some(c => c.name === n);
+    const have = (n) => cols.some(c => c.name.toLowerCase() === n.toLowerCase());
     const alters = [];
     
     if (!have('original_name')) alters.push('ALTER TABLE files ADD COLUMN original_name TEXT');
@@ -174,7 +181,7 @@ async function ensureFileColumns(db = getCurrentDB()) {
 
 async function ensureGpgColumns(db = getCurrentDB()) {
     const cols = await all(db, 'PRAGMA table_info(gpg)');
-    const have = (n) => cols.some(c => c.name === n);
+    const have = (n) => cols.some(c => c.name.toLowerCase() === n.toLowerCase());
     
     if (!have('content')) {
         await run(db, 'ALTER TABLE gpg ADD COLUMN content TEXT');
@@ -189,7 +196,7 @@ async function ensureGpgColumns(db = getCurrentDB()) {
 
 async function ensureGroupColumns(db = getCurrentDB()) {
     const cols = await all(db, 'PRAGMA table_info(groups)');
-    const have = (n) => cols.some(c => c.name === n);
+    const have = (n) => cols.some(c => c.name.toLowerCase() === n.toLowerCase());
     
     if (!have('added_date')) {
         await run(db, 'ALTER TABLE groups ADD COLUMN added_date TEXT');
@@ -198,7 +205,7 @@ async function ensureGroupColumns(db = getCurrentDB()) {
 
 async function ensureAuthColumns(db = getCurrentDB()) {
     const cols = await all(db, 'PRAGMA table_info(auth)');
-    const have = (n) => cols.some(c => c.name === n);
+    const have = (n) => cols.some(c => c.name.toLowerCase() === n.toLowerCase());
     const alters = [];
     if (!have('vault_public_key')) alters.push('ALTER TABLE auth ADD COLUMN vault_public_key TEXT');
     if (!have('vault_private_key')) alters.push('ALTER TABLE auth ADD COLUMN vault_private_key TEXT');
@@ -217,7 +224,7 @@ async function optimize(db = getCurrentDB()) {
 
 async function ensureGroupByName(name, db = getCurrentDB()) {
     if (!name) return null;
-    await ensureGroupColumns(db);
+    // ensureGroupColumns removed - called in ensureBaseTables
     const found = await get(db, 'SELECT id FROM groups WHERE name = ?', [name]).catch(() => null);
     if (found && found.id) return found.id;
     await run(db, 'INSERT OR IGNORE INTO groups (name, added_date) VALUES (?, ?)', [name, new Date().toISOString()]).catch(() => {});
@@ -227,7 +234,7 @@ async function ensureGroupByName(name, db = getCurrentDB()) {
 
 async function getPasswords(db = getCurrentDB()) {
     await ensureBaseTables(db);
-    await ensurePasswordColumns(db);
+    // ensurePasswordColumns removed - called in ensureBaseTables
     return all(db, `SELECT p.id,
                            COALESCE(p.label, p.name) AS label,
                            COALESCE(g.name, 'Default') AS group_name,
@@ -247,7 +254,7 @@ async function getFiles(db = getCurrentDB()) {
 
 async function getGpg(db = getCurrentDB()) {
     await ensureBaseTables(db);
-    await ensureGpgColumns(db);
+    // ensureGpgColumns removed - called in ensureBaseTables
     return all(db, 'SELECT id, name, type AS value, content, user_id, added_date FROM gpg ORDER BY id DESC');
 }
 
@@ -263,7 +270,7 @@ async function getCounts(db = getCurrentDB()) {
 
 async function addPassword(payload, db = getCurrentDB()) {
     await ensureBaseTables(db);
-    await ensurePasswordColumns(db);
+    // ensurePasswordColumns removed - called in ensureBaseTables
     const { label, group, address, username, password } = payload;
     
     const groupId = group ? await ensureGroupByName(group, db) : 1;
@@ -276,7 +283,7 @@ async function addPassword(payload, db = getCurrentDB()) {
 
 async function updatePassword(payload, db = getCurrentDB()) {
     await ensureBaseTables(db);
-    await ensurePasswordColumns(db);
+    // ensurePasswordColumns removed - called in ensureBaseTables
     const fields = [];
     const params = [];
     if (payload.label != null) { fields.push('label = ?'); params.push(payload.label); }
@@ -309,7 +316,7 @@ async function addFile(payload, db = getCurrentDB()) {
 
 async function addGpg(payload, db = getCurrentDB()) {
     await ensureBaseTables(db);
-    await ensureGpgColumns(db);
+    // ensureGpgColumns removed - called in ensureBaseTables
     const type = payload.type || 'key';
     const content = payload.content || payload.value || '';
     const userId = payload.userId || payload.user_id || '';
@@ -320,13 +327,13 @@ async function addGpg(payload, db = getCurrentDB()) {
 
 async function getGroups(db = getCurrentDB()) {
     await ensureBaseTables(db);
-    await ensureGroupColumns(db);
+    // ensureGroupColumns removed - called in ensureBaseTables
     return all(db, 'SELECT id, name, added_date FROM groups ORDER BY name ASC');
 }
 
 async function addGroup(name, db = getCurrentDB()) {
     await ensureBaseTables(db);
-    await ensureGroupColumns(db);
+    // ensureGroupColumns removed - called in ensureBaseTables
     const addedDate = new Date().toISOString();
     const res = await run(db, 'INSERT OR IGNORE INTO groups (name, added_date) VALUES (?,?)', [name, addedDate]);
     return { id: res && res.lastID };
@@ -352,7 +359,7 @@ async function deleteGpg(id, db = getCurrentDB()) {
 
 async function getGpgById(id, db = getCurrentDB()) {
     await ensureBaseTables(db);
-    await ensureGpgColumns(db);
+    // ensureGpgColumns removed - called in ensureBaseTables
     return get(db, 'SELECT * FROM gpg WHERE id = ?', [id]);
 }
 

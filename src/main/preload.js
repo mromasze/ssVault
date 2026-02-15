@@ -28,5 +28,18 @@ contextBridge.exposeInMainWorld('api', {
     deleteGpgKey: (id) => ipcRenderer.invoke('delete-gpg-key', id),
     gpgEncrypt: (payload) => ipcRenderer.invoke('gpg-encrypt', payload),
     gpgDecrypt: (payload) => ipcRenderer.invoke('gpg-decrypt', payload),
-    getAppInfo: () => ipcRenderer.invoke('get-app-info')
+    getAppInfo: () => ipcRenderer.invoke('get-app-info'),
+
+    // Updates
+    checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+    downloadUpdate: () => ipcRenderer.invoke('download-update'),
+    quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
+    getUpdateSettings: () => ipcRenderer.invoke('get-update-settings'),
+    setUpdateSettings: (settings) => ipcRenderer.invoke('set-update-settings', settings),
+    onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (e, info) => callback(info)),
+    onUpdateNotAvailable: (callback) => ipcRenderer.on('update-not-available', (e, info) => callback(info)),
+    onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', (e, info) => callback(info)),
+    onUpdateError: (callback) => ipcRenderer.on('update-error', (e, msg) => callback(msg)),
+    onUpdateChecking: (callback) => ipcRenderer.on('update-checking', (e) => callback()),
+    onUpdateProgress: (callback) => ipcRenderer.on('update-download-progress', (e, progress) => callback(progress))
 });

@@ -1,7 +1,7 @@
 const { ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const VaultHandler = require('../handlers/vaultHandler');
 const { openVaultDB, closeCurrentDB, getCurrentDB } = require('../utils/db');
 const { setMasterPasswordForVault, validateMasterPasswordForVault } = require('../utils/auth');
@@ -437,11 +437,14 @@ function registerVaultIpcHandlers(mainWindow) {
     
     ipcMain.handle('get-app-info', () => {
         try {
-            const pkg = require(path.resolve(__dirname, '../../../package.json'));
+            // Adjust path to point to project root package.json
+            const pkgPath = path.join(__dirname, '../../../package.json');
+            console.log('Loading package.json from:', pkgPath);
+            const pkg = require(pkgPath);
             return {
-                version: pkg.version,
-                author: pkg.author,
-                license: pkg.license
+                version: pkg.version || 'Unknown',
+                author: pkg.author || 'Unknown',
+                license: pkg.license || 'Unknown'
             };
         } catch (err) {
             console.error('get-app-info error:', err);

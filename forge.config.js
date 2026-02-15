@@ -16,7 +16,7 @@ module.exports = {
       /\.map$/,
       /__tests__|__mocks__|\.md$|LICENSE|CHANGELOG/i,
       /^node_modules\/adm-zip\/test/,
-      /^node_modules\/bcrypt\/test/,
+      /^node_modules\/bcryptjs\/test/,
       /^node_modules\/electron-store\/test/,
       /^node_modules\/openpgp\/test/,
       /^node_modules\/.*\.md$/,
@@ -165,4 +165,16 @@ module.exports = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'Amazir',
+          name: 'ssVault'
+        },
+        prerelease: false
+      }
+    }
+  ]
 };

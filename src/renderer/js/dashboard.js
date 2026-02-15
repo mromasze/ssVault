@@ -8,6 +8,7 @@ import { setupClipboardHandlers } from './modules/handlers/clipboardHandlers.js'
 import { setupFormHandlers } from './modules/handlers/formHandlers.js';
 import { setupSortHandlers } from './modules/handlers/sortHandlers.js';
 import { setupPasswordGeneratorListeners } from './modules/passwordGenerator.js';
+import { setupSettingsHandler } from './modules/settingsHandler.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Setup all event handlers
@@ -22,28 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFormHandlers();
     setupSortHandlers();
     setupPasswordGeneratorListeners();
+    setupSettingsHandler();
 
     // Load initial data
     loadVaultName();
     loadCounts();
     loadData('passwords');
     loadData('files');
-
-    // Settings handler
-    const settingsBtn = document.getElementById('settingsBtn');
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', async () => {
-            const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
-            modal.show();
-            
-            try {
-                const info = await window.api.getAppInfo();
-                document.getElementById('appVersion').textContent = info.version || 'Unknown';
-                document.getElementById('appAuthor').textContent = info.author || 'Unknown';
-                document.getElementById('appLicense').textContent = info.license || 'Unknown';
-            } catch (err) {
-                console.error('Failed to load app info:', err);
-            }
-        });
-    }
 });

@@ -3,6 +3,7 @@ const path = require('path');
 const { createWindow } = require('./core/app');
 const { registerVaultIpcHandlers } = require('./ipc/vaultIpc');
 const { registerFileIpcHandlers } = require('./ipc/fileIpc');
+const { registerUpdateIpcHandlers } = require('./ipc/updateIpc');
 
 const VaultManager = require('./utils/vaultManager');
 global.vaultMgr = new VaultManager();
@@ -43,6 +44,7 @@ app.whenReady().then(() => {
 
     registerVaultIpcHandlers(mainWindow);
     registerFileIpcHandlers();
+    registerUpdateIpcHandlers(mainWindow);
 });
 
 app.on('before-quit', async (event) => {
