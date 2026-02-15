@@ -95,26 +95,33 @@ export function openEditPasswordModal(item) {
 
 // Setup password field toggle and generator listeners
 function setupPasswordFieldListeners() {
-    setTimeout(() => {
-        const toggleBtn = document.getElementById('togglePasswordVisibility');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                const pwdInput = document.getElementById('addValue');
-                const icon = toggleBtn.querySelector('i');
-                if (pwdInput.type === 'password') {
-                    pwdInput.type = 'text';
-                    icon.className = 'bi bi-eye-slash';
-                } else {
-                    pwdInput.type = 'password';
-                    icon.className = 'bi bi-eye';
-                }
-            });
-        }
-        const genBtn = document.getElementById('generatePasswordBtn');
-        if (genBtn) {
-            genBtn.addEventListener('click', () => openPasswordGeneratorModal('addValue'));
-        }
-    }, 0);
+    const toggleBtn = document.getElementById('togglePasswordVisibility');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pwdInput = document.getElementById('addValue');
+            const icon = toggleBtn.querySelector('i');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                pwdInput.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        });
+    }
+    const genBtn = document.getElementById('generatePasswordBtn');
+    if (genBtn) {
+        genBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const genModalEl = document.getElementById('passwordGeneratorModal');
+            if (genModalEl) {
+                genModalEl.setAttribute('data-bs-backdrop', 'static');
+                genModalEl.style.zIndex = '1070';
+            }
+            openPasswordGeneratorModal('addValue');
+        });
+    }
 }
 
 // Open GPG generate modal

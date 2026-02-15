@@ -45,7 +45,11 @@ export function calculatePasswordStrength(password) {
 
 export function openPasswordGeneratorModal(targetInputId) {
     passwordGeneratorTargetInputId = targetInputId;
-    const modal = new bootstrap.Modal(document.getElementById('passwordGeneratorModal'));
+    const modalEl = document.getElementById('passwordGeneratorModal');
+    let modal = bootstrap.Modal.getInstance(modalEl);
+    if (!modal) {
+        modal = new bootstrap.Modal(modalEl);
+    }
     const length = 16;
     byId('passwordLength').value = length;
     byId('passwordLengthValue').textContent = length;

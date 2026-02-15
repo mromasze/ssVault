@@ -1,6 +1,6 @@
 {
   "name": "ssVault",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Secure local password and secrets manager built with Electron.",
   "productName": "ssVault",
   "author": "mromasze",
@@ -8,7 +8,7 @@
   "main": "src/main/main.js",
   "scripts": {
     "test": "echo \"No automated tests configured\"",
-    "start": "electron-forge start",
+    "start": "LD_LIBRARY_PATH=./lib electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish"

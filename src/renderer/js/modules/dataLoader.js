@@ -211,7 +211,11 @@ export async function loadGroupsIntoSelect(selectedGroup = '') {
         if (!select) return;
         select.innerHTML = '<option value="">Default</option>';
         if (groups && groups.length > 0) {
+            const seen = new Set();
             groups.forEach(g => {
+                if (g.name === 'Default') return;
+                if (seen.has(g.name)) return;
+                seen.add(g.name);
                 const opt = document.createElement('option');
                 opt.value = g.name;
                 opt.textContent = g.name;

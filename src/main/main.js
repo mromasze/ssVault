@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 const { createWindow } = require('./core/app');
 const { registerVaultIpcHandlers } = require('./ipc/vaultIpc');
@@ -9,7 +9,12 @@ global.vaultMgr = new VaultManager();
 
 let isQuitting = false;
 
+// Fix for VM rendering issues (Linux/Hyper-V)
+app.disableHardwareAcceleration();
+
 app.whenReady().then(() => {
+    Menu.setApplicationMenu(null);
+
     const splash = new BrowserWindow({
         width: 420,
         height: 260,

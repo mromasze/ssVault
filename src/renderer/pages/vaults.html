@@ -25,10 +25,12 @@
                 <h1>Vaults</h1>
                 <button id="createBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">Create new</button>
                 <button id="importBtn" class="btn btn-secondary">Import</button>
-                <table class="table mt-3">
-                    <thead><tr><th>Name</th><th>Path</th><th>Actions</th></tr></thead>
-                    <tbody id="vaultList"></tbody>
-                </table>
+                <div class="table-responsive mt-3" style="max-height: 250px; overflow-y: auto;">
+                    <table class="table table-sm table-hover">
+                        <thead class="sticky-top bg-white"><tr><th>Name</th><th>Path</th><th>Actions</th></tr></thead>
+                        <tbody id="vaultList"></tbody>
+                    </table>
+                </div>
             </div>
             <div class="modal fade" id="openModal" tabindex="-1">
                 <div class="modal-dialog">
