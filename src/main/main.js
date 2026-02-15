@@ -25,8 +25,10 @@ app.whenReady().then(() => {
         alwaysOnTop: true,
         transparent: false,
         backgroundColor: '#1e1e1e',
+        autoHideMenuBar: true,
         webPreferences: { sandbox: true }
     });
+    splash.removeMenu();
     splash.loadFile(path.join(__dirname, '../renderer/pages/splash.html'));
 
     const mainWindow = createWindow();

@@ -8,6 +8,8 @@ function createWindow() {
         show: false,
         backgroundColor: '#1e1e1e',
         resizable: false,
+        autoHideMenuBar: true,
+        menuBarVisible: false,
         webPreferences: {
             preload: path.join(__dirname, '../preload.js'),
             nodeIntegration: false,
@@ -16,6 +18,7 @@ function createWindow() {
             sandbox: true
         }
     });
+    mainWindow.removeMenu();
 
     mainWindow.loadFile(path.join(__dirname, '../../renderer/pages/vaults.html'));
     if (process.env.NODE_ENV === 'development') {
